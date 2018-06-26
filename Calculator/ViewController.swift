@@ -15,7 +15,7 @@ class ViewController: UIViewController {
     var op = ""
     var isFirstNumber = true
     var hasOp = false
-    var canClear = true
+
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -27,10 +27,6 @@ class ViewController: UIViewController {
     }
 
     @IBAction func handleButtonPress(_ sender: UIButton) {
-        if canClear {
-            resultLabel.text = ""
-            canClear = false
-        }
         let currentText = resultLabel.text!
         let textLabel = sender.titleLabel?.text
         if let text = textLabel {
@@ -43,14 +39,12 @@ class ViewController: UIViewController {
                 isFirstNumber = false
                 hasOp = true
                 resultLabel.text = "\(currentText) \(op) "
-                break
             case "=":
-                isFirstNumber = true
                 hasOp = false
-                canClear = true
+                isFirstNumber = false
                 let result = calculate()
+                firstNumberText = "\(result)"
                 resultLabel.text = "\(result)"
-                break
             default:
                 if isFirstNumber {
                     firstNumberText = "\(firstNumberText)\(text)"
@@ -58,7 +52,6 @@ class ViewController: UIViewController {
                     secondNumberText = "\(secondNumberText)\(text)"
                 }
                 resultLabel.text = "\(currentText)\(text)"
-                break;
             }
         }
     }
