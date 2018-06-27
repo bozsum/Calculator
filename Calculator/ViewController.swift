@@ -31,6 +31,13 @@ class ViewController: UIViewController {
         let textLabel = sender.titleLabel?.text
         if let text = textLabel {
             switch text {
+            case "Clear" :
+                hasOp = false
+                isFirstNumber = true
+                firstNumberText = ""
+                secondNumberText = ""
+                op = ""
+                resultLabel.text = ""
             case "+", "*", "/", "-":
                 if hasOp {
                     return
