@@ -10,11 +10,13 @@ import UIKit
 
 class ViewController: UIViewController {
     @IBOutlet weak var resultLabel: UILabel!
-    var firstNumberText = ""
-    var secondNumberText = ""
-    var op = ""
-    var isFirstNumber = true
-    var hasOp = false
+    var hasOperand = false
+    var hasOperator = false
+    var operatorArray = [String]()
+    var operandArray = [Double]()
+    var lastOperator: String?
+    var lastResult: Double = 0
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,62 +27,104 @@ class ViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
+    
     @IBAction func handleButtonPress(_ sender: UIButton) {
         let currentText = resultLabel.text!
         let textLabel = sender.titleLabel?.text
         if let text = textLabel {
             switch text {
             case "Clear" :
-                hasOp = false
-                isFirstNumber = true
-                firstNumberText = ""
-                secondNumberText = ""
-                op = ""
+                hasOperand = false
+                hasOperator = false
+                operatorArray.removeAll()
+                operandArray.removeAll()
+                lastOperator = nil
                 resultLabel.text = ""
             case "+", "*", "/", "-":
-                if hasOp {
-                    return
+                if !hasOperator && hasOperand {
+                    hasOperator = true
+                    lastOperator = text
+                    operandArray.append(Double(currentText)!)
+                    
+                    if checkPriotyToCalculate(text) {
+                        let result = calculate()
+                        resultLabel.text = "\(result)"
+                    }
+                } else if hasOperator && hasOperand {
+                    lastOperator = text
                 }
-                op = text
-                isFirstNumber = false
-                hasOp = true
-                resultLabel.text = "\(currentText) \(op) "
             case "=":
-                hasOp = false
-                isFirstNumber = false
-                let result = calculate()
-                firstNumberText = "\(result)"
-                resultLabel.text = "\(result)"
-            default:
-                if isFirstNumber {
-                    firstNumberText = "\(firstNumberText)\(text)"
-                } else {
-                    secondNumberText = "\(secondNumberText)\(text)"
+                var result: Double = 0
+                if hasOperand && operatorArray.count > 0 {
+                    operandArray.append(Double(currentText)!)
+                    while operandArray.count > 0 {
+                        result = calculate()
+                    }
+                } else if hasOperand {
+                    result = lastResult
                 }
-                resultLabel.text = "\(currentText)\(text)"
+                resultLabel.text = "\(result)"
+               print("=")
+            default:
+                hasOperand = true
+                if hasOperator {
+                    resultLabel.text = "\(text)"
+                    operatorArray.append(lastOperator!)
+                    lastOperator = nil
+                    hasOperator = false
+                } else {
+                    resultLabel.text = "\(currentText)\(text)"
+                }
             }
         }
     }
     
     func calculate() -> Double {
-        let firstNumber = Double(firstNumberText) ?? 0
-        let secondNumber = Double(secondNumberText) ?? 0
-        firstNumberText = ""
-        secondNumberText = ""
-        switch op {
+        var tempResult: Double = 0
+        if operandArray.count > 1 {
+            let secondValue = operandArray.popLast()!
+            let firstValue = operandArray.popLast()!
+            let operatorValue = operatorArray.popLast()!
+            tempResult = mathFunction(operatorValue, firstValue, secondValue)
+            operandArray.append(tempResult)
+        } else {
+            tempResult = operandArray.popLast()!
+        }
+        lastResult = tempResult
+        return tempResult
+    }
+    
+    func mathFunction(_ operatorVal: String, _ firstValue: Double, _ secondValue: Double) -> Double {
+        switch operatorVal {
         case "+":
-            return firstNumber + secondNumber
+            return firstValue + secondValue
         case "-":
-            return firstNumber - secondNumber
+            return firstValue - secondValue
         case "*":
-            return firstNumber * secondNumber
+            return firstValue * secondValue
         case "/":
-            return firstNumber / secondNumber
+            return firstValue / secondValue
         default:
             return 0
         }
     }
     
+    func checkPriotyToCalculate(_ currentOperator: String) -> Bool {
+        if (operatorArray.count > 0) {
+            let lastOperatorIsFirstPriority = isFirstPriority(operatorArray[operatorArray.count-1])
+            let currentOperatorIsFirstPriority = isFirstPriority(currentOperator)
+            return lastOperatorIsFirstPriority || !currentOperatorIsFirstPriority
+        }
+        return false
+    }
+    
+    func isFirstPriority(_ op: String) -> Bool {
+        switch op {
+        case "*", "/":
+            return true
+        default:
+            return false
+        }
+    }
 }
 
