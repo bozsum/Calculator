@@ -64,7 +64,10 @@ class ViewController: UIViewController {
                     result = lastResult
                 }
                 resultLabel.text = "\(result)"
-               print("=")
+            case "+/-":
+                if hasOperand {
+                    resultLabel.text = "\(-Double(currentText)!)"
+                }
             default:
                 hasOperand = true
                 if hasOperator {
