@@ -16,6 +16,7 @@ class ViewController: UIViewController {
     var operandArray = [Double]()
     var lastOperator: String?
     var lastResult: Double = 0
+    var hasDecimal = false
     
 
     override func viewDidLoad() {
@@ -36,6 +37,7 @@ class ViewController: UIViewController {
             case "Clear" :
                 hasOperand = false
                 hasOperator = false
+                hasDecimal = false
                 operatorArray.removeAll()
                 operandArray.removeAll()
                 lastOperator = nil
@@ -69,14 +71,20 @@ class ViewController: UIViewController {
                     resultLabel.text = "\(-Double(currentText)!)"
                 }
             default:
-                hasOperand = true
                 if hasOperator {
                     resultLabel.text = "\(text)"
                     operatorArray.append(lastOperator!)
                     lastOperator = nil
                     hasOperator = false
+                    hasDecimal = false
                 } else {
-                    resultLabel.text = "\(currentText)\(text)"
+                    if text == "." && !hasDecimal && hasOperand {
+                        hasDecimal = true
+                        resultLabel.text = "\(currentText)\(text)"
+                    } else if text != "." {
+                        hasOperand = true
+                        resultLabel.text = "\(currentText)\(text)"
+                    }
                 }
             }
         }
